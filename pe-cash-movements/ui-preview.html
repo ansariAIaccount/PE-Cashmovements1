@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PE Cash Movements — UI preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f5f7fb; --surface:#fff; --surface-2:#fbfcfe; --border:#e4e8ef;
+    --text:#1a2233; --muted:#6b7488; --brand:#3f51b5; --brand-2:#5f6fd8;
+    --success:#0e8a5f; --warning:#b57900; --danger:#b3261e;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, sans-serif; -webkit-font-smoothing:antialiased;}
+  a{color:var(--brand); text-decoration:none} a:hover{text-decoration:underline}
+  .mono{font-family:var(--mono); letter-spacing:-.01em}
+  .muted{color:var(--muted)}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; vertical-align:middle}
+
+  .shell{display:grid; grid-template-columns:240px 1fr; min-height:100vh}
+  aside.sidenav{background:linear-gradient(180deg,#111830 0%,#1a2247 100%); color:#dfe3ee; padding:20px 0}
+  .brand{display:flex; align-items:center; gap:10px; padding:0 20px 20px; border-bottom:1px solid rgba(255,255,255,.06)}
+  .logo{width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,#5f6fd8,#7ee3c1); display:grid; place-items:center; color:#0b1124; font-weight:700; font-size:13px}
+  .brand .name{font-weight:600; font-size:14px}
+  .brand .sub{font-size:11px; color:#a3abc2}
+  .nav-group{padding:12px}
+  .nav-group .label{font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8893b4; padding:0 12px 6px}
+  .nav-link{display:flex; align-items:center; gap:12px; padding:9px 12px; margin:2px 0; border-radius:8px; color:#c8cfe2; font-size:13.5px; font-weight:500; cursor:pointer}
+  .nav-link .material-symbols-rounded{font-size:20px; color:#8893b4}
+  .nav-link:hover{background:rgba(255,255,255,.04); color:#fff}
+  .nav-link.active{background:rgba(95,111,216,.18); color:#fff}
+  .nav-link.active .material-symbols-rounded{color:#b9c2ff}
+
+  .topbar{height:56px; background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 24px}
+  .crumbs{color:var(--muted); font-size:13px}
+  .actions{display:flex; gap:10px; align-items:center}
+  .user-chip{display:flex; gap:8px; align-items:center; padding:4px 10px 4px 4px; border:1px solid var(--border); border-radius:999px}
+  .avatar{width:26px; height:26px; border-radius:999px; background:#3f51b5; color:#fff; display:grid; place-items:center; font-size:11.5px; font-weight:600}
+  main{background:var(--bg); overflow:auto}
+
+  .page{padding:24px 32px; max-width:1440px; margin:0 auto}
+  .page-header{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px}
+  .page-header h1{margin:0 0 4px; font-size:22px; font-weight:600; letter-spacing:-.01em}
+  .page-header .sub{color:var(--muted); font-size:13px}
+
+  .btn{display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:#fff; color:var(--text); font-weight:500; font-size:13px; cursor:pointer}
+  .btn:hover{background:#f6f8ff}
+  .btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+  .btn.primary:hover{background:#384699}
+  .btn .material-symbols-rounded{font-size:18px}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card > .card-hd{padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between}
+  .card-hd .title{font-weight:600; font-size:14px}
+  .card-hd .desc{color:var(--muted); font-size:12.5px; margin-top:2px}
+  .card > .card-bd{padding:20px}
+
+  .kpi-grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:16px; margin-bottom:24px}
+  .kpi{background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px 20px}
+  .kpi .label{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em}
+  .kpi .value{font-size:26px; font-weight:600; margin-top:4px; letter-spacing:-.02em}
+  .kpi .delta{font-size:12px; margin-top:4px}
+  .kpi .delta.up{color:var(--success)} .kpi .delta.down{color:var(--danger)}
+
+  table.enterprise{width:100%; border-collapse:collapse; font-size:13.5px}
+  table.enterprise th, table.enterprise td{text-align:left; padding:12px 16px; border-bottom:1px solid var(--border); white-space:nowrap}
+  table.enterprise th{font-weight:600; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; background:var(--surface-2)}
+  table.enterprise tr:hover td{background:#fafbff}
+  table.enterprise td.num{text-align:right; font-family:var(--mono)}
+
+  .status-chip{display:inline-flex; align-items:center; gap:6px; padding:2px 10px; border-radius:999px; font-size:11.5px; font-weight:600}
+  .status-chip .material-symbols-rounded{font-size:14px}
+  .s-DRAFT{background:#eef1f7; color:#4c5567}
+  .s-AUTHORIZED,.s-SUBMITTED,.s-POSTED{background:#e0ecff; color:#1f4fbd}
+  .s-PENDING{background:#fff4d6; color:#8a5a00}
+  .s-SETTLED{background:#def4e6; color:#0e6a44}
+  .s-GL_POSTED{background:#defcef; color:#0a7750}
+  .s-RETURNED,.s-FAILED{background:#fde0dc; color:#9a2a22}
+
+  .pill-tab{display:inline-flex; gap:6px; padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:500; border:1px solid var(--border); color:var(--muted); cursor:pointer}
+  .pill-tab.active{background:#eef1ff; color:var(--brand); border-color:#c9d1ff}
+
+  /* Stepper */
+  .stepper{display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border)}
+  .step{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted)}
+  .step .num{width:24px; height:24px; border-radius:999px; background:#eef1f7; color:var(--muted); display:grid; place-items:center; font-weight:600; font-size:12px}
+  .step.active{color:var(--text)} .step.active .num{background:var(--brand); color:#fff}
+  .step.done .num{background:var(--success); color:#fff}
+  .stepper .sep{flex:0 0 24px; height:1px; background:var(--border)}
+
+  .type-tile{text-align:left; padding:16px; border-radius:12px; background:#fff; border:1px solid var(--border); display:flex; gap:14px; align-items:flex-start; cursor:pointer; transition:.15s}
+  .type-tile:hover{border-color:var(--brand); box-shadow:0 4px 12px rgba(16,24,40,.08); transform:translateY(-1px)}
+  .type-tile.selected{border-color:var(--brand); background:#f4f6ff}
+  .type-tile .ic{width:40px; height:40px; border-radius:10px; background:#eef1ff; color:var(--brand); display:grid; place-items:center; flex:0 0 auto}
+  .type-tile .title{font-weight:600; font-size:14px}
+  .type-tile .desc{color:var(--muted); font-size:12.5px; margin-top:2px}
+
+  /* Lifecycle */
+  .lifecycle{list-style:none; padding:0; margin:0}
+  .lifecycle li{display:flex; align-items:center; gap:10px; padding:6px 0; color:var(--muted); font-size:13px}
+  .lifecycle .dot{width:9px; height:9px; border-radius:999px; background:#dde2ed}
+  .lifecycle li.done{color:var(--text)} .lifecycle li.done .dot{background:var(--success)}
+
+  .tl{position:relative}
+  .tl:before{content:''; position:absolute; left:8px; top:8px; bottom:8px; width:1px; background:var(--border)}
+  .tl-item{display:grid; grid-template-columns:20px 1fr; padding:8px 0}
+  .tl-dot{width:10px; height:10px; border-radius:999px; background:#fff; border:2px solid var(--brand); margin-top:4px; z-index:1}
+  .tl-kind{font-weight:500; font-size:13px; display:flex; align-items:center; gap:8px}
+  .tl-kind .material-symbols-rounded{font-size:18px; color:var(--brand)}
+  .tl-at{font-size:12px; color:var(--muted)}
+
+  /* view switcher */
+  .view{display:none} .view.active{display:block}
+
+  .info-banner{margin-top:16px; padding:12px 16px; background:#eef4ff; border:1px solid #d9e2ff; border-radius:10px; color:#25346f; font-size:13px; display:flex; gap:10px; align-items:flex-start}
+  .info-banner .material-symbols-rounded{color:#3f51b5}
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:12px; color:var(--muted); font-weight:500}
+  .field input, .field select{padding:10px 12px; border:1px solid var(--border); border-radius:8px; font:inherit; background:#fff}
+  .field input:focus, .field select:focus{outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(63,81,181,.12)}
+  .detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 32px}
+  .detail-grid > div{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed var(--border)}
+  .detail-grid .lbl{color:var(--muted); font-size:12px}
+
+  .preview-bar{position:fixed; bottom:16px; right:16px; background:#0b1124; color:#dfe3ee; padding:8px 14px; border-radius:999px; font-size:12px; box-shadow:0 6px 20px rgba(0,0,0,.25)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidenav">
+    <div class="brand">
+      <div class="logo">PE</div>
+      <div>
+        <div class="name">Cash Movements</div>
+        <div class="sub">Investran · Plaid</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="label">Treasury</div>
+      <div class="nav-link" data-view="dashboard"><span class="material-symbols-rounded">dashboard</span>Dashboard</div>
+      <div class="nav-link" data-view="movements"><span class="material-symbols-rounded">swap_horiz</span>Cash Movements</div>
+      <div class="nav-link" data-view="new"><span class="material-symbols-rounded">add_circle</span>New Movement</div>
+    </div>
+    <div class="nav-group">
+      <div class="label">Accounts</div>
+      <div class="nav-link" data-view="entities"><span class="material-symbols-rounded">groups</span>Entities</div>
+      <div class="nav-link" data-view="accounts"><span class="material-symbols-rounded">account_balance</span>Bank Accounts (Plaid)</div>
+    </div>
+    <div class="nav-group">
+      <div class="label">Accounting</div>
+      <div class="nav-link" data-view="gl"><span class="material-symbols-rounded">receipt_long</span>GL Postings</div>
+    </div>
+  </aside>
+
+  <div style="display:flex; flex-direction:column; min-width:0">
+    <header class="topbar">
+      <div class="crumbs">Highland Capital — Fund II / Fund III · Sandbox</div>
+      <div class="actions">
+        <span class="status-chip s-GL_POSTED"><span class="material-symbols-rounded">check_circle</span> Plaid sandbox</span>
+        <div class="user-chip"><div class="avatar">FA</div><div>Ferhat Ansari</div></div>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view active">
+        <div class="page">
+          <div class="page-header">
+            <div><h1>Treasury dashboard</h1><div class="sub">Live view of cash movements and GL posting status across the fund complex</div></div>
+            <div style="display:flex; gap:12px;">
+              <button class="btn" onclick="go('accounts')"><span class="material-symbols-rounded">account_balance</span>Link bank (Plaid)</button>
+              <button class="btn primary" onclick="go('new')"><span class="material-symbols-rounded">add</span>New movement</button>
+            </div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="label">In flight</div><div class="value">4</div><div class="delta muted">$12,450,000</div></div>
+            <div class="kpi"><div class="label">Settled · 30d</div><div class="value">$48.2M</div><div class="delta up">23 movements</div></div>
+            <div class="kpi"><div class="label">GL posted · 30d</div><div class="value">23</div><div class="delta muted">All balanced</div></div>
+            <div class="kpi"><div class="label">Exceptions</div><div class="value">1</div><div class="delta down">Needs review</div></div>
+          </div>
+
+          <div class="card" style="margin-bottom:24px;">
+            <div class="card-hd">
+              <div><div class="title">Recent movements</div><div class="desc">Last 10 across all funds</div></div>
+              <span class="pill-tab active" onclick="go('movements')">View all</span>
+            </div>
+            <table class="enterprise">
+              <thead><tr><th>Reference</th><th>Type</th><th>From</th><th>To</th><th style="text-align:right">Amount</th><th>Status</th><th>Created</th></tr></thead>
+              <tbody id="dash-rows"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div><div class="title">Recent GL postings</div><div class="desc">Double-entry journals sent to Investran</div></div>
+              <span class="pill-tab active" onclick="go('gl')">Open ledger</span>
+            </div>
+            <table class="enterprise">
+              <thead><tr><th>Confirmation</th><th>Reference</th><th>Lines</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th>Posted</th></tr></thead>
+              <tbody id="dash-gl"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOVEMENTS LIST -->
+      <section id="view-movements" class="view">
+        <div class="page">
+          <div class="page-header">
+            <div><h1>Cash movements</h1><div class="sub">Everything in flight and everything posted</div></div>
+            <button class="btn primary" onclick="go('new')"><span class="material-symbols-rounded">add</span>New movement</button>
+          </div>
+          <div class="card">
+            <div class="card-hd">
+              <div style="display:flex; gap:8px;">
+                <span class="pill-tab active">All types</span>
+                <span class="pill-tab">Capital Call</span>
+                <span class="pill-tab">Distribution</span>
+                <span class="pill-tab">Internal Transfer</span>
+                <span class="pill-tab">Expense</span>
+                <span class="pill-tab">PortCo Invest.</span>
+              </div>
+              <div class="muted" style="font-size:12.5px;">Showing 8 of 47 · sorted newest</div>
+            </div>
+            <table class="enterprise">
+              <thead><tr><th>Reference</th><th>Type</th><th>From</th><th>To</th><th style="text-align:right">Amount</th><th>Status</th><th>Created</th><th>GL</th></tr></thead>
+              <tbody id="mov-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- NEW MOVEMENT -->
+      <section id="view-new" class="view">
+        <div class="page" style="max-width:960px;">
+          <div class="page-header">
+            <div><h1>New cash movement</h1><div class="sub">Initiate, authorize via Plaid, settle, post to Investran GL</div></div>
+            <button class="btn" onclick="go('movements')"><span class="material-symbols-rounded">close</span>Cancel</button>
+          </div>
+          <div class="card">
+            <div class="stepper">
+              <div class="step done"><div class="num">1</div>Type</div>
+              <div class="sep"></div>
+              <div class="step active"><div class="num">2</div>From &amp; To</div>
+              <div class="sep"></div>
+              <div class="step"><div class="num">3</div>Amount &amp; reference</div>
+              <div class="sep"></div>
+              <div class="step"><div class="num">4</div>Review &amp; submit</div>
+            </div>
+            <div class="card-bd">
+              <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;" id="type-tiles">
+                <div class="type-tile selected" data-type="CAPITAL_CALL"><div class="ic"><span class="material-symbols-rounded">call_received</span></div><div><div class="title">Capital call</div><div class="desc">Pull funds from an LP into a fund</div></div></div>
+                <div class="type-tile" data-type="DISTRIBUTION"><div class="ic"><span class="material-symbols-rounded">call_made</span></div><div><div class="title">Distribution</div><div class="desc">Pay distribution from a fund to an LP</div></div></div>
+                <div class="type-tile" data-type="INTERNAL_TRANSFER"><div class="ic"><span class="material-symbols-rounded">swap_horiz</span></div><div><div class="title">Internal transfer</div><div class="desc">Move cash between fund / mgmt co entities</div></div></div>
+                <div class="type-tile" data-type="EXPENSE_PAYMENT"><div class="ic"><span class="material-symbols-rounded">receipt</span></div><div><div class="title">Expense / vendor</div><div class="desc">Pay a vendor (legal, audit, admin, …)</div></div></div>
+                <div class="type-tile" data-type="PORTCO_INVESTMENT"><div class="ic"><span class="material-symbols-rounded">trending_up</span></div><div><div class="title">PortCo investment</div><div class="desc">Deploy capital into a portfolio company</div></div></div>
+              </div>
+
+              <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+                <div class="form-grid">
+                  <div class="field"><label id="from-label">From (LP)</label><select id="from-select"></select></div>
+                  <div class="field"><label>From bank account</label><select id="from-bank"></select></div>
+                  <div class="field"><label id="to-label">To (Fund)</label><select id="to-select"></select></div>
+                  <div class="field"><label>To bank account</label><select id="to-bank"></select></div>
+                  <div class="field"><label>Amount</label><input type="text" id="amount-input" value="2,500,000.00" /></div>
+                  <div class="field"><label>Currency</label><select><option>USD</option><option>EUR</option><option>GBP</option></select></div>
+                  <div class="field"><label>Reference</label><input type="text" id="reference-input" value="Call #7 · Fund II" /></div>
+                  <div class="field"><label>Memo (optional)</label><input type="text" id="memo-input" value="Q2 2026 capital call" /></div>
+                </div>
+
+                <div class="info-banner">
+                  <span class="material-symbols-rounded">shield</span>
+                  <div><strong>What happens on submit</strong> — Plaid authorizes the ACH, creates the transfer, and emits status webhooks. On <em>settled</em>, a balanced JE is posted to Investran GL.</div>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:8px; justify-content:flex-end;">
+                  <button class="btn">Back</button>
+                  <button class="btn primary" onclick="go('detail')"><span class="material-symbols-rounded">send</span>Authorize &amp; submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DETAIL -->
+      <section id="view-detail" class="view">
+        <div class="page" style="max-width:1100px;">
+          <div class="page-header">
+            <div><h1>Call #7 · Fund II</h1><div class="sub">Capital Call · created Apr 23, 2026 · 10:24</div></div>
+            <div style="display:flex; gap:8px;">
+              <span class="status-chip s-POSTED"><span class="material-symbols-rounded">pending_actions</span>Posted</span>
+              <button class="btn" onclick="go('movements')"><span class="material-symbols-rounded">list</span>All movements</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:24px;">
+            <div>
+              <div class="card" style="margin-bottom:24px;">
+                <div class="card-hd"><div class="title">Details</div></div>
+                <div class="card-bd">
+                  <div class="detail-grid">
+                    <div><span class="lbl">From</span><span>Alpine Capital Partners <span class="muted">(LP)</span></span></div>
+                    <div><span class="lbl">From bank</span><span>BofA LP Funding · ••1102</span></div>
+                    <div><span class="lbl">To</span><span>Highland Growth Fund II LP <span class="muted">(FUND)</span></span></div>
+                    <div><span class="lbl">To bank</span><span>JPMC Operating · ••4421</span></div>
+                    <div><span class="lbl">Amount</span><span class="mono" style="font-weight:600;">$2,500,000.00</span></div>
+                    <div><span class="lbl">Memo</span><span>Q2 2026 capital call</span></div>
+                    <div><span class="lbl">Plaid authorization</span><span class="mono">auth-sbx_4c2fba91</span></div>
+                    <div><span class="lbl">Plaid transfer</span><span class="mono">xfer-sbx_9a61e80f</span></div>
+                    <div><span class="lbl">GL confirmation</span><span class="mono">—</span></div>
+                    <div><span class="lbl">Settled at</span><span>—</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-hd"><div><div class="title">Event timeline</div><div class="desc">Every state change is journaled — audit trail for SOX / SOC 2</div></div></div>
+                <div class="card-bd">
+                  <div class="tl">
+                    <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-kind"><span class="material-symbols-rounded">edit_note</span>created</div><div class="tl-at">Apr 23, 2026 · 10:24:11</div></div></div>
+                    <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-kind"><span class="material-symbols-rounded">task_alt</span>authorized</div><div class="tl-at">Apr 23, 2026 · 10:24:13 · decision approved</div></div></div>
+                    <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-kind"><span class="material-symbols-rounded">send</span>submitted</div><div class="tl-at">Apr 23, 2026 · 10:24:14 · plaid transfer_id xfer-sbx_9a61e80f</div></div></div>
+                    <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-kind"><span class="material-symbols-rounded">swap_horiz</span>plaid.pending</div><div class="tl-at">Apr 23, 2026 · 10:24:18</div></div></div>
+                    <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-kind"><span class="material-symbols-rounded">swap_horiz</span>plaid.posted</div><div class="tl-at">Apr 23, 2026 · 10:41:02</div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <aside>
+              <div class="card" style="margin-bottom:24px;">
+                <div class="card-hd"><div class="title">Actions</div></div>
+                <div class="card-bd" style="display:flex; flex-direction:column; gap:8px;">
+                  <button class="btn"><span class="material-symbols-rounded">schedule</span>Mark pending</button>
+                  <button class="btn"><span class="material-symbols-rounded">pending_actions</span>Mark posted</button>
+                  <button class="btn primary"><span class="material-symbols-rounded">verified</span>Settle &amp; post to GL</button>
+                  <button class="btn" style="color:var(--danger); border-color:#f7c7c2;"><span class="material-symbols-rounded">undo</span>Simulate return</button>
+                  <div class="muted" style="font-size:12px; margin-top:8px;">Dev helpers for sandbox. In production these are driven by Plaid webhooks.</div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-hd"><div class="title">Lifecycle</div></div>
+                <div class="card-bd">
+                  <ol class="lifecycle">
+                    <li class="done"><span class="dot"></span>Draft</li>
+                    <li class="done"><span class="dot"></span>Authorized · Plaid</li>
+                    <li class="done"><span class="dot"></span>Submitted · ACH</li>
+                    <li class="done"><span class="dot"></span>Posted at RDFI</li>
+                    <li><span class="dot"></span>Settled</li>
+                    <li><span class="dot"></span>GL posted · Investran</li>
+                  </ol>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENTITIES -->
+      <section id="view-entities" class="view">
+        <div class="page">
+          <div class="page-header">
+            <div><h1>Entities</h1><div class="sub">Funds, LPs, portfolio companies, vendors — all sources/destinations for cash movements</div></div>
+            <button class="btn"><span class="material-symbols-rounded">upload</span>Sync from Investran</button>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; margin-bottom:16px;">
+            <div class="pill-tab active">All (13)</div>
+            <div class="pill-tab">Fund (2)</div>
+            <div class="pill-tab">Limited Partner (4)</div>
+            <div class="pill-tab">Portfolio Co. (3)</div>
+            <div class="pill-tab">Vendor (3)</div>
+            <div class="pill-tab">Mgmt Co (1)</div>
+          </div>
+          <div class="card">
+            <table class="enterprise">
+              <thead><tr><th>Name</th><th>Type</th><th>Investran ID</th><th></th></tr></thead>
+              <tbody id="ent-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACCOUNTS -->
+      <section id="view-accounts" class="view">
+        <div class="page">
+          <div class="page-header">
+            <div><h1>Bank accounts</h1><div class="sub">Linked to each entity via Plaid — used as source/destination in cash movements</div></div>
+            <div style="display:flex; gap:12px;">
+              <div class="field" style="min-width:260px;"><label>Link a Plaid account to…</label>
+                <select><option>Highland Growth Fund II LP</option><option>Alpine Capital Partners</option></select>
+              </div>
+              <button class="btn primary" style="align-self:flex-end;"><span class="material-symbols-rounded">link</span>Open Plaid Link</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div><div class="title">Linked accounts</div><div class="desc">6 bank accounts across 6 entities</div></div></div>
+            <table class="enterprise">
+              <thead><tr><th>Entity</th><th>Type</th><th>Account</th><th>Mask</th><th>Currency</th><th>Source</th></tr></thead>
+              <tbody id="acc-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- GL -->
+      <section id="view-gl" class="view">
+        <div class="page">
+          <div class="page-header">
+            <div><h1>GL postings — Investran</h1><div class="sub">Double-entry journals auto-posted on movement settlement</div></div>
+            <button class="btn"><span class="material-symbols-rounded">download</span>Export JE batch</button>
+          </div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-hd">
+              <div><div class="title">Call #6 · Fund II · <span class="mono muted" style="font-weight:500;">INV-5832104</span></div><div class="desc">Posted Apr 22, 2026 · 2 lines · USD</div></div>
+              <span class="status-chip s-GL_POSTED"><span class="material-symbols-rounded">check_circle</span>Posted</span>
+            </div>
+            <table class="enterprise">
+              <thead><tr><th>Account</th><th>Entity</th><th>Description</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">1010</td><td>Highland Growth Fund II LP</td><td>Capital call Call #6</td><td class="num">$1,800,000.00</td><td class="num"></td></tr>
+                <tr><td class="mono">1300</td><td>Meridian Pension Trust</td><td>LP contribution Meridian Pension Trust</td><td class="num"></td><td class="num">$1,800,000.00</td></tr>
+                <tr style="font-weight:600; background:var(--surface-2);"><td colspan="3" style="text-align:right;">Totals</td><td class="num">$1,800,000.00</td><td class="num">$1,800,000.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-hd">
+              <div><div class="title">Dist 2026-Q1 · Fund II · <span class="mono muted" style="font-weight:500;">INV-5819732</span></div><div class="desc">Posted Apr 21, 2026 · 2 lines · USD</div></div>
+              <span class="status-chip s-GL_POSTED"><span class="material-symbols-rounded">check_circle</span>Posted</span>
+            </div>
+            <table class="enterprise">
+              <thead><tr><th>Account</th><th>Entity</th><th>Description</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">2200</td><td>Aurora Family Office</td><td>Distribution Dist 2026-Q1</td><td class="num">$4,250,000.00</td><td class="num"></td></tr>
+                <tr><td class="mono">1010</td><td>Highland Growth Fund II LP</td><td>Cash paid from Highland Growth Fund II LP</td><td class="num"></td><td class="num">$4,250,000.00</td></tr>
+                <tr style="font-weight:600; background:var(--surface-2);"><td colspan="3" style="text-align:right;">Totals</td><td class="num">$4,250,000.00</td><td class="num">$4,250,000.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="preview-bar">UI preview · click the side nav to explore</div>
+
+<script>
+  const DEMO = {
+    movements: [
+      { ref:'Call #7',        type:'Capital Call',      from:'Alpine Capital Partners',    to:'Highland Growth Fund II LP', amount:'$2,500,000.00', status:'POSTED',    created:'Apr 23, 10:24', gl:'—' },
+      { ref:'Dist 2026-Q1',   type:'Distribution',      from:'Highland Growth Fund II LP', to:'Aurora Family Office',       amount:'$4,250,000.00', status:'GL_POSTED', created:'Apr 21, 14:11', gl:'INV-5819732' },
+      { ref:'Call #6',        type:'Capital Call',      from:'Meridian Pension Trust',     to:'Highland Growth Fund II LP', amount:'$1,800,000.00', status:'GL_POSTED', created:'Apr 20, 09:51', gl:'INV-5832104' },
+      { ref:'Kirkland Inv 9821', type:'Expense Payment', from:'Highland Growth Fund II LP', to:'Kirkland & Ellis LLP',       amount:'$182,450.00',   status:'SETTLED',   created:'Apr 19, 16:02', gl:'—' },
+      { ref:'Nimbus Series C',type:'PortCo Investment', from:'Highland Growth Fund III LP',to:'Nimbus Robotics Inc.',       amount:'$12,000,000.00',status:'PENDING',   created:'Apr 19, 11:30', gl:'—' },
+      { ref:'Interco T-441',  type:'Internal Transfer', from:'Highland Growth Fund II LP', to:'Highland Capital Management LLC', amount:'$500,000.00', status:'GL_POSTED', created:'Apr 18, 13:44', gl:'INV-5798221' },
+      { ref:'PwC Audit Q1',   type:'Expense Payment',   from:'Highland Growth Fund II LP', to:'PwC — Audit',                amount:'$94,000.00',    status:'RETURNED',  created:'Apr 18, 10:12', gl:'—' },
+      { ref:'Dist 2026-Q1b',  type:'Distribution',      from:'Highland Growth Fund II LP', to:'Alpine Capital Partners',    amount:'$3,100,000.00', status:'GL_POSTED', created:'Apr 16, 15:20', gl:'INV-5788201' },
+    ],
+    gl: [
+      { conf:'INV-5832104', ref:'Call #6',       lines:2, dr:'$1,800,000.00',  cr:'$1,800,000.00',  posted:'Apr 20, 09:52' },
+      { conf:'INV-5819732', ref:'Dist 2026-Q1',  lines:2, dr:'$4,250,000.00',  cr:'$4,250,000.00',  posted:'Apr 21, 14:13' },
+      { conf:'INV-5798221', ref:'Interco T-441', lines:2, dr:'$500,000.00',    cr:'$500,000.00',    posted:'Apr 18, 13:46' },
+      { conf:'INV-5788201', ref:'Dist 2026-Q1b', lines:2, dr:'$3,100,000.00',  cr:'$3,100,000.00',  posted:'Apr 16, 15:22' },
+    ],
+    entities: [
+      { name:'Highland Growth Fund II LP',       type:'Fund',             id:'FND-0201' },
+      { name:'Highland Growth Fund III LP',      type:'Fund',             id:'FND-0301' },
+      { name:'Highland Capital Management LLC',  type:'Management Co',    id:'MGT-0001' },
+      { name:'Alpine Capital Partners',          type:'Limited Partner',  id:'LP-1001'  },
+      { name:'Meridian Pension Trust',           type:'Limited Partner',  id:'LP-1002'  },
+      { name:'Aurora Family Office',             type:'Limited Partner',  id:'LP-1003'  },
+      { name:'Pacific Endowment Fund',           type:'Limited Partner',  id:'LP-1004'  },
+      { name:'Nimbus Robotics Inc.',             type:'Portfolio Co.',    id:'PC-2001'  },
+      { name:'Vector Bio Therapeutics',          type:'Portfolio Co.',    id:'PC-2002'  },
+      { name:'Orchid Analytics',                 type:'Portfolio Co.',    id:'PC-2003'  },
+      { name:'Kirkland & Ellis LLP',             type:'Vendor',           id:'VN-3001'  },
+      { name:'PwC — Audit',                      type:'Vendor',           id:'VN-3002'  },
+      { name:'SS&C Fund Services',               type:'Vendor',           id:'VN-3003'  },
+    ],
+    accounts: [
+      { entity:'Highland Growth Fund II LP', etype:'FUND', name:'JPMC Operating',       mask:'4421', ccy:'USD', linked:true },
+      { entity:'Highland Growth Fund III LP',etype:'FUND', name:'JPMC Operating',       mask:'7788', ccy:'USD', linked:true },
+      { entity:'Alpine Capital Partners',    etype:'LP',   name:'BofA LP Funding',      mask:'1102', ccy:'USD', linked:true },
+      { entity:'Meridian Pension Trust',     etype:'LP',   name:'State Street Custody', mask:'9981', ccy:'USD', linked:true },
+      { entity:'Nimbus Robotics Inc.',       etype:'PORTCO', name:'SVB Business',       mask:'2255', ccy:'USD', linked:false },
+      { entity:'Kirkland & Ellis LLP',       etype:'VENDOR', name:'Citi Vendor',        mask:'3310', ccy:'USD', linked:false },
+    ],
+  };
+
+  function row(m) {
+    return `<tr>
+      <td class="mono"><a href="#" onclick="go('detail'); return false;">${m.ref}</a></td>
+      <td>${m.type}</td>
+      <td>${m.from}</td>
+      <td>${m.to}</td>
+      <td class="num">${m.amount}</td>
+      <td><span class="status-chip s-${m.status}"><span class="material-symbols-rounded">${iconFor(m.status)}</span>${m.status.replace('_',' ').toLowerCase().replace(/\b\w/g, c=>c.toUpperCase())}</span></td>
+      <td class="muted">${m.created}</td>
+      ${m.gl !== undefined ? `<td class="mono">${m.gl}</td>` : ''}
+    </tr>`;
+  }
+  function iconFor(s){ return {DRAFT:'edit_note',AUTHORIZED:'task_alt',SUBMITTED:'send',PENDING:'schedule',POSTED:'pending_actions',SETTLED:'verified',GL_POSTED:'check_circle',RETURNED:'undo',FAILED:'error'}[s]||'radio_button_unchecked'; }
+
+  function renderAll() {
+    document.getElementById('dash-rows').innerHTML = DEMO.movements.slice(0,6).map((m)=>{
+      const clone = {...m}; delete clone.gl; return row(clone);
+    }).join('');
+    document.getElementById('dash-gl').innerHTML = DEMO.gl.map(g => `<tr><td class="mono">${g.conf}</td><td>${g.ref}</td><td>${g.lines}</td><td class="num">${g.dr}</td><td class="num">${g.cr}</td><td class="muted">${g.posted}</td></tr>`).join('');
+    document.getElementById('mov-rows').innerHTML = DEMO.movements.map(row).join('');
+    document.getElementById('ent-rows').innerHTML = DEMO.entities.map(e => `<tr><td style="font-weight:500;">${e.name}</td><td>${e.type}</td><td class="mono">${e.id}</td><td><button class="btn"><span class="material-symbols-rounded">chevron_right</span></button></td></tr>`).join('');
+    document.getElementById('acc-rows').innerHTML = DEMO.accounts.map(a => `<tr><td style="font-weight:500;">${a.entity}</td><td class="muted">${a.etype}</td><td>${a.name}</td><td class="mono">••${a.mask}</td><td>${a.ccy}</td><td>${a.linked ? '<span class="status-chip s-GL_POSTED"><span class="material-symbols-rounded">link</span>Plaid</span>' : '<span class="status-chip s-DRAFT">Seed / not linked</span>'}</td></tr>`).join('');
+  }
+
+  function go(view){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.dataset.view === view));
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => go(l.dataset.view)));
+
+  // --- New Movement wiring ------------------------------------------------
+  const TYPE_CONFIG = {
+    CAPITAL_CALL: {
+      fromLabel: 'From (LP)', toLabel: 'To (Fund)',
+      fromEntities: ['Alpine Capital Partners','Meridian Pension Trust','Aurora Family Office','Pacific Endowment Fund'],
+      toEntities:   ['Highland Growth Fund II LP','Highland Growth Fund III LP'],
+      fromBanks: { 'Alpine Capital Partners': ['BofA LP Funding · ••1102'],
+                   'Meridian Pension Trust':  ['State Street Custody · ••9981'],
+                   'Aurora Family Office':    ['Fidelity Cash · ••5540'],
+                   'Pacific Endowment Fund':  ['BNY Mellon · ••8812'] },
+      toBanks:   { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'] },
+      defaults: { amount: '2,500,000.00', reference: 'Call #7 · Fund II', memo: 'Q2 2026 capital call' },
+    },
+    DISTRIBUTION: {
+      fromLabel: 'From (Fund)', toLabel: 'To (LP)',
+      fromEntities: ['Highland Growth Fund II LP','Highland Growth Fund III LP'],
+      toEntities:   ['Alpine Capital Partners','Meridian Pension Trust','Aurora Family Office','Pacific Endowment Fund'],
+      fromBanks: { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'] },
+      toBanks:   { 'Alpine Capital Partners': ['BofA LP Funding · ••1102'],
+                   'Meridian Pension Trust':  ['State Street Custody · ••9981'],
+                   'Aurora Family Office':    ['Fidelity Cash · ••5540'],
+                   'Pacific Endowment Fund':  ['BNY Mellon · ••8812'] },
+      defaults: { amount: '4,250,000.00', reference: 'Dist 2026-Q2', memo: 'Quarterly distribution — return of capital' },
+    },
+    INTERNAL_TRANSFER: {
+      fromLabel: 'From (Fund / MgmtCo)', toLabel: 'To (Fund / MgmtCo)',
+      fromEntities: ['Highland Growth Fund II LP','Highland Growth Fund III LP','Highland Capital Management LLC'],
+      toEntities:   ['Highland Growth Fund II LP','Highland Growth Fund III LP','Highland Capital Management LLC'],
+      fromBanks: { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'],
+                   'Highland Capital Management LLC': ['Citi Mgmt Co · ••0231'] },
+      toBanks:   { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'],
+                   'Highland Capital Management LLC': ['Citi Mgmt Co · ••0231'] },
+      defaults: { amount: '500,000.00', reference: 'Interco T-441', memo: 'Mgmt fee sweep' },
+    },
+    EXPENSE_PAYMENT: {
+      fromLabel: 'From (Fund)', toLabel: 'To (Vendor)',
+      fromEntities: ['Highland Growth Fund II LP','Highland Growth Fund III LP'],
+      toEntities:   ['Kirkland & Ellis LLP','PwC — Audit','SS&C Fund Services'],
+      fromBanks: { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'] },
+      toBanks:   { 'Kirkland & Ellis LLP': ['Citi Vendor · ••3310'],
+                   'PwC — Audit':          ['Wells Fargo · ••4402'],
+                   'SS&C Fund Services':   ['Citi Vendor · ••9918'] },
+      defaults: { amount: '182,450.00', reference: 'Kirkland Inv 9821', memo: 'Q1 legal fees — Fund II' },
+    },
+    PORTCO_INVESTMENT: {
+      fromLabel: 'From (Fund)', toLabel: 'To (Portfolio company)',
+      fromEntities: ['Highland Growth Fund II LP','Highland Growth Fund III LP'],
+      toEntities:   ['Nimbus Robotics Inc.','Vector Bio Therapeutics','Orchid Analytics'],
+      fromBanks: { 'Highland Growth Fund II LP':  ['JPMC Operating · ••4421'],
+                   'Highland Growth Fund III LP': ['JPMC Operating · ••7788'] },
+      toBanks:   { 'Nimbus Robotics Inc.':     ['SVB Business · ••2255'],
+                   'Vector Bio Therapeutics':  ['SVB Business · ••6601'],
+                   'Orchid Analytics':         ['Mercury · ••7740'] },
+      defaults: { amount: '12,000,000.00', reference: 'Nimbus Series C', memo: 'Lead check — Series C' },
+    },
+  };
+
+  function fill(selectEl, options) {
+    selectEl.innerHTML = options.map(o => `<option>${o}</option>`).join('');
+  }
+  function applyType(type) {
+    const cfg = TYPE_CONFIG[type];
+    if (!cfg) return;
+    document.getElementById('from-label').textContent = cfg.fromLabel;
+    document.getElementById('to-label').textContent   = cfg.toLabel;
+
+    const fromSel = document.getElementById('from-select');
+    const toSel   = document.getElementById('to-select');
+    fill(fromSel, cfg.fromEntities);
+    fill(toSel,   cfg.toEntities);
+
+    refreshBanks(cfg, 'from');
+    refreshBanks(cfg, 'to');
+
+    fromSel.onchange = () => refreshBanks(cfg, 'from');
+    toSel.onchange   = () => refreshBanks(cfg, 'to');
+
+    document.getElementById('amount-input').value    = cfg.defaults.amount;
+    document.getElementById('reference-input').value = cfg.defaults.reference;
+    document.getElementById('memo-input').value      = cfg.defaults.memo;
+
+    document.querySelectorAll('#type-tiles .type-tile').forEach(t => {
+      t.classList.toggle('selected', t.dataset.type === type);
+    });
+  }
+  function refreshBanks(cfg, side) {
+    const entitySel = document.getElementById(side + '-select');
+    const bankSel   = document.getElementById(side + '-bank');
+    const map       = side === 'from' ? cfg.fromBanks : cfg.toBanks;
+    const entity    = entitySel.value;
+    fill(bankSel, map[entity] || ['— no linked account —']);
+  }
+  document.querySelectorAll('#type-tiles .type-tile').forEach(t => {
+    t.addEventListener('click', () => applyType(t.dataset.type));
+  });
+  applyType('CAPITAL_CALL');
+
+  renderAll();
+  go('dashboard');
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<div class="shell">
+  <aside class="sidenav">
+    <div class="brand">
+      <div class="logo">PE</div>
+      <div>
+        <div class="name">Cash Movements</div>
+        <div class="sub">Investran · Plaid</div>
+      </div>
+    </div>
+
+    <div class="nav-group" *ngFor="let g of nav">
+      <div class="label">{{ g.group }}</div>
+      <a *ngFor="let item of g.items"
+         class="nav-link"
+         [routerLink]="item.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: item.path === '/movements' }">
+        <span class="material-symbols-rounded">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </div>
+  </aside>
+
+  <div style="display: flex; flex-direction: column; min-width: 0;">
+    <header class="topbar">
+      <div class="crumbs">Highland Capital — Fund II / Fund III · Sandbox</div>
+      <div class="actions">
+        <span class="status-chip s-GL_POSTED"><span class="material-symbols-rounded">check_circle</span> Plaid sandbox</span>
+        <div class="user-chip"><div class="avatar">FA</div><div class="name">Ferhat Ansari</div></div>
+      </div>
+    </header>
+    <main class="main">
+      <router-outlet />
+    </main>
+  </div>
+</div>
